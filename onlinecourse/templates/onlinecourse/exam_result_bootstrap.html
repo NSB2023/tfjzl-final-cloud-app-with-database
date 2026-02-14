@@ -1,3 +1,4 @@
+<!--
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,18 +39,105 @@
 <div class="container-fluid">
     {% if grade > 80 %}
     <div class="alert alert-success">
+
+    -->
        <!--HINT Display passed info -->
+<!--
+
     </div>
         {% else %}
         <div class="alert alert-danger">
-            <!--HINT Display failed info -->
         </div>
         <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
         {% endif %}
         <div class="card-columns-vertical mt-1">
         <h5 class="">Exam results</h5>
-            <!--HINT Display exam results-->
         </div>
     </div>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-light bg-light">
+    <a class="navbar-brand" href="{% url 'onlinecourse:index' %}">Home</a>
+
+    {% if user.is_authenticated %}
+        <div>
+            <span class="mr-2">{{ user.first_name }} ({{ user.username }})</span>
+            <a class="btn btn-link" href="{% url 'onlinecourse:logout' %}">Logout</a>
+        </div>
+    {% endif %}
+</nav>
+
+<div class="container mt-4">
+
+    <!-- PASS CASE -->
+    {% if grade >= 50 %}
+        <div class="alert alert-success">
+            <b>Congratulations, {{ user.first_name }}!</b>
+            You have passed the exam and completed the course with score {{ grade }} / 100
+        </div>
+    {% else %}
+        <div class="alert alert-danger">
+            <b>Failed</b> Sorry, {{ user.first_name }}!
+            You have failed exam with score {{ grade }} / 100
+        </div>
+
+        <a href="{% url 'onlinecourse:course_details' course.id %}" class="text-danger">
+            Re-test
+        </a>
+    {% endif %}
+
+    <h4>Exam results</h4>
+
+    {% for question in course.question_set.all %}
+        <div class="card mt-2">
+            <div class="card-header">
+                <h5>{{ question.content }}</h5>
+            </div>
+
+            <div class="card-body">
+
+                {% for choice in question.choice_set.all %}
+
+                    {% if choice.is_correct and choice in choices %}
+                        <div class="text-success">
+                            Correct answer: {{ choice.content }}
+                        </div>
+
+                    {% elif choice.is_correct and not choice in choices %}
+                        <div class="text-warning">
+                            Not selected: {{ choice.content }}
+                        </div>
+
+                    {% elif not choice.is_correct and choice in choices %}
+                        <div class="text-danger">
+                            Wrong answer: {{ choice.content }}
+                        </div>
+
+                    {% else %}
+                        <div>
+                            {{ choice.content }}
+                        </div>
+                    {% endif %}
+
+                {% endfor %}
+
+            </div>
+        </div>
+    {% endfor %}
+
+</div>
+
 </body>
 </html>

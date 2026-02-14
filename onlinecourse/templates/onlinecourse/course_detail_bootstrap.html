@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
      {% load static %}
@@ -10,7 +10,6 @@
 </head>
 
 <body>
-    <!-- Navigation bar -->
     <nav class="navbar navbar-light bg-light">
         <div class="container-fluid">
             <div class="navbar-header">
@@ -39,7 +38,6 @@
         </div>
     </nav>
 
-    <!-- Page content -->
     <div class="container-fluid">
             <h2>{{ course.name }}</h2>
             <div class="card-columns-vertical">
@@ -50,7 +48,119 @@
                     </div>
                 {% endfor %}
             </div>
-            <!-- Course detail template changes go here -->
     </div>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+
+<!-- Navigation bar -->
+<nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'onlinecourse:index' %}">Home</a>
+
+        {% if user.is_authenticated %}
+            <div>
+                <span class="mr-2">{{ user.first_name }} ({{ user.username }})</span>
+                <a class="btn btn-link" href="{% url 'onlinecourse:logout' %}">Logout</a>
+            </div>
+        {% else %}
+            <form class="form-inline" action="{% url 'onlinecourse:login' %}" method="post">
+                {% csrf_token %}
+                <input type="text" class="form-control mr-2" placeholder="Username" name="username">
+                <input type="password" class="form-control mr-2" placeholder="Password" name="psw">
+                <button class="btn btn-primary" type="submit">Login</button>
+                <a class="btn btn-link" href="{% url 'onlinecourse:registration' %}">Sign Up</a>
+            </form>
+        {% endif %}
+    </div>
+</nav>
+
+<!-- Page content -->
+<div class="container mt-4">
+
+    <h2>{{ course.name }}</h2>
+    <p>{{ course.description }}</p>
+
+    
+    <!-- Enroll button 
+    {% if user.is_authenticated and not course.is_enrolled %}
+        <a href="{% url 'onlinecourse:enroll' course.id %}" class="btn btn-success mb-3">
+            Enroll
+        </a>
+    {% endif %}   -->
+
+    <!-- Lessons -->
+    {% for lesson in course.lesson_set.all %}
+        <div class="card mt-2">
+            <div class="card-header">
+                <h5>Lesson {{ lesson.order|add:1 }}: {{ lesson.title }}</h5>
+            </div>
+            <div class="card-body">
+                {{ lesson.content }}
+            </div>
+        </div>
+    {% endfor %}
+
+    <!-- ================= EXAM SECTION ================= -->
+
+    {% if user.is_authenticated %}
+
+        <br><br>
+
+        <button class="btn btn-primary btn-block" data-toggle="collapse" data-target="#exam">
+            Start Exam
+        </button>
+
+        <div id="exam" class="collapse mt-3">
+
+            <form action="{% url 'onlinecourse:submit' course.id %}" method="POST">
+                {% csrf_token %}
+
+                {% for question in course.question_set.all %}
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5>{{ question.content }}</h5>
+                        </div>
+
+                        <div class="card-body">
+                            {% for choice in question.choice_set.all %}
+                                <div class="form-check">
+                                    <label class="form-check-label">
+                                        <input type="checkbox"
+                                               name="choice_{{choice.id}}"
+                                               class="form-check-input"
+                                               value="{{choice.id}}">
+                                        {{ choice.content }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <br>
+                <input type="submit" class="btn btn-success btn-block" value="Submit">
+            </form>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
 </body>
 </html>
